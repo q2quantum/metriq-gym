@@ -77,6 +77,22 @@ Explore more generic examples in the ready-made JSON schemas under
 canonical configurations used for Metriq Score 1.0; the score definition is in
 ``metriq_gym/suites/metriq_score_1_0.json``.
 
+### Windows / Python 3.13 setup notes (q2quantum fork)
+
+Working around a few environment issues found bringing the stand up on Windows + CPython 3.13 (2026-09-08):
+
+1. **Python 3.12 or 3.13**, not 3.14 (`requires-python = ">=3.12,<3.14"`). With `uv`: `uv python install 3.13 && uv venv --python 3.13`.
+2. **numpy from the lockfile fails to build on win/py3.13.** `numpy==1.26.4` has no py3.13 Windows wheel, so it is compiled from source and the compiled build raises
+   `OverflowError: cannot convert longdouble infinity to integer` in `numpy/core/getlimits.py` on first import. Fix: `uv pip install "numpy==2.1.3"` over the synced env — `qiskit-aer 0.17.2` and `qbraid` then import cleanly.
+3. **`platformdirs` builds an invalid Windows path.** `metriq_gym/paths.py` derives the app-author from the package `Author-email` (`Unitary Foundation team <metriq@unitary.foundation>`); the `<` `>` characters are illegal in Windows paths, so `job dispatch` fails on `mkdir`. Set both override env vars to valid directories (both are checked first in `paths.py`):
+   ```sh
+   export MGYM_LOCAL_DB_DIR="$PWD/.mgym_data"
+   export MGYM_LOCAL_SIMULATOR_CACHE_DIR="$PWD/.mgym_cache"
+   ```
+4. **Console encoding.** `mgym` prints ✓ / ✗ status glyphs; on a non-UTF-8 Windows console this raises `UnicodeEncodeError`. Run with `PYTHONUTF8=1` (or `PYTHONIOENCODING=utf-8`).
+
+Items 2 and 3 are candidates for an upstream fix.
+
 ## Jobs dashboard
 
 A local web view of your dispatched jobs — lifecycle status, per-device suite coverage,
