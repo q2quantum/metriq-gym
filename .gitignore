@@ -51,3 +51,8 @@ docs/site/
 
 # mypy
 .mypy_cache/
+
+# Local mgym runtime dirs (q2quantum fork; MGYM_LOCAL_DB_DIR / MGYM_LOCAL_SIMULATOR_CACHE_DIR
+# — set on Windows to avoid the invalid-path crash from the package Author-email, see README)
+.mgym_cache/
+.mgym_data/
